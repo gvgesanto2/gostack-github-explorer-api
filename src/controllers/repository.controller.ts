@@ -3,6 +3,7 @@ import { getRepository } from 'typeorm';
 
 import asyncHandler from '../middleware/asynHandler';
 import Repository from '../models/repository.model';
+import CreateRepositoryService from '../services/create-repository.service';
 
 // @desc Get all repositories
 // @route GET /api/v1/repositories
@@ -13,7 +14,7 @@ export const getRepositories = asyncHandler(
 
     const repositories = await reposRepository.find();
 
-    res.status(200).json({ data: repositories });
+    res.status(200).json({ success: true, data: repositories });
   },
 );
 
@@ -34,9 +35,9 @@ export const createRepository = asyncHandler(
       issues,
     } = req.body;
 
-    const reposRepository = getRepository(Repository);
+    const createRepositoryService = new CreateRepositoryService();
 
-    const repository = reposRepository.create({
+    const newRepository = await createRepositoryService.execute({
       id,
       full_name,
       description,
@@ -48,8 +49,6 @@ export const createRepository = asyncHandler(
       issues,
     });
 
-    await reposRepository.save(repository);
-
-    res.status(200).json({ data: repository });
+    res.status(200).json({ success: true, data: newRepository });
   },
 );

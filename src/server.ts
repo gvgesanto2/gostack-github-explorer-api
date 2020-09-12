@@ -10,6 +10,8 @@ import bodyParser from 'body-parser';
 // Connecting to the database
 import './database';
 
+import errorHandler from './middleware/errorHandler';
+
 // Import routes file
 import routes from './routes';
 
@@ -24,6 +26,10 @@ app.use(bodyParser.json());
 // Mount routes
 app.use('/api/v1', routes);
 
+// Handling errors
+app.use(errorHandler);
+
+// Starting the server
 const PORT = process.env.PORT || 3333;
 const mode = process.env.NODE_ENV || 'development';
 
