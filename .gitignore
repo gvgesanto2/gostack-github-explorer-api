@@ -1,0 +1,9 @@
+.vscode/
+node_modules/
+src/config/config.env
+build/
+
+public/uploads/*
+!public/uploads/.gitkeep
+
+ormconfig.json
