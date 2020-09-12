@@ -39,8 +39,8 @@ class Repository {
     };
   }[];
 
-  // @Column({ type: 'json' })
-  // issues: any[];
+  @Column('boolean')
+  isFavorite: boolean;
 }
 
 export default Repository;

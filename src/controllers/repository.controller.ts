@@ -4,6 +4,7 @@ import { getRepository } from 'typeorm';
 import asyncHandler from '../middleware/asynHandler';
 import Repository from '../models/repository.model';
 import CreateRepositoryService from '../services/create-repository.service';
+import UpdateRepositoryService from '../services/update-repository.service';
 
 // @desc Get all repositories
 // @route GET /api/v1/repositories
@@ -23,32 +24,32 @@ export const getRepositories = asyncHandler(
 // @access Private
 export const createRepository = asyncHandler(
   async (req, res, _): Promise<Response | void> => {
-    const {
-      id,
-      full_name,
-      description,
-      owner,
-      watchers_count,
-      stargazers_count,
-      forks_count,
-      open_issues_count,
-      issues,
-    } = req.body;
-
     const createRepositoryService = new CreateRepositoryService();
 
-    const newRepository = await createRepositoryService.execute({
-      id,
-      full_name,
-      description,
-      owner,
-      watchers_count,
-      stargazers_count,
-      forks_count,
-      open_issues_count,
-      issues,
-    });
+    const newRepository = await createRepositoryService.execute(req.body);
 
     res.status(200).json({ success: true, data: newRepository });
   },
 );
+
+// @desc Update a repository
+// @route PUT /api/v1/repositories/:repositoryId
+// @access Private
+export const updateRepository = asyncHandler(
+  async (req, res, _): Promise<Response | void> => {
+    const repositoryId = Number(req.params.repositoryId);
+
+    const updateRepositoryService = new UpdateRepositoryService();
+
+    const updatedRepository = await updateRepositoryService.execute({
+      repositoryId,
+      fieldsToUpdate: req.body,
+    });
+
+    res.status(200).json({ success: true, data: updatedRepository });
+  },
+);
+
+// @desc Delete a repository
+// @route DELETE /api/v1/repositories/:repositoryId
+// @access Private

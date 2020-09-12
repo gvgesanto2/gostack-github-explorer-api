@@ -44,7 +44,6 @@ export default class CreateRepositories1599870632128
           {
             name: 'issues',
             type: 'json',
-            isNullable: true,
           },
           {
             name: 'createdAt',
