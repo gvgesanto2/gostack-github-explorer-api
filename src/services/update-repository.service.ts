@@ -17,15 +17,16 @@ class UpdateRepositoryService {
   }: ServiceRequest): Promise<Repository> {
     const reposRepository = getRepository(Repository);
 
-    const repository = await reposRepository.findOne(repositoryId);
+    const repositoryToUpdate = await reposRepository.findOne(repositoryId);
 
-    if (!repository) {
-      throw new ErrorResponse('No repository found with this ID.', 400);
+    if (!repositoryToUpdate) {
+      throw new ErrorResponse('No repository found with this ID.', 404);
     }
 
     const updatedRepository = {
-      ...repository,
-      isFavorite: isFavorite === undefined ? repository.isFavorite : isFavorite,
+      ...repositoryToUpdate,
+      isFavorite:
+        isFavorite === undefined ? repositoryToUpdate.isFavorite : isFavorite,
     };
 
     await reposRepository.save(updatedRepository);

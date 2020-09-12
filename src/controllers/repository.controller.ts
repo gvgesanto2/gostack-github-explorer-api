@@ -4,6 +4,7 @@ import { getRepository } from 'typeorm';
 import asyncHandler from '../middleware/asynHandler';
 import Repository from '../models/repository.model';
 import CreateRepositoryService from '../services/create-repository.service';
+import RemoveRepositoryService from '../services/remove-repository.service';
 import UpdateRepositoryService from '../services/update-repository.service';
 
 // @desc Get all repositories
@@ -50,6 +51,17 @@ export const updateRepository = asyncHandler(
   },
 );
 
-// @desc Delete a repository
+// @desc Remove a repository from the database
 // @route DELETE /api/v1/repositories/:repositoryId
 // @access Private
+export const removeRepository = asyncHandler(
+  async (req, res, _): Promise<Response | void> => {
+    const repositoryId = Number(req.params.repositoryId);
+
+    const removeRepositoryService = new RemoveRepositoryService();
+
+    await removeRepositoryService.execute({ repositoryId });
+
+    res.status(200).json({ success: true, data: {} });
+  },
+);
