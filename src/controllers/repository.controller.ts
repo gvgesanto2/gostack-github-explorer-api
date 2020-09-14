@@ -6,6 +6,9 @@ import Repository from '../models/repository.model';
 import CreateRepositoryService from '../services/create-repository.service';
 import RemoveRepositoryService from '../services/remove-repository.service';
 import UpdateRepositoryService from '../services/update-repository.service';
+import AddRepositoryToFavoritesService from '../services/add-repository-to-favorites';
+import AddRepositoryToCollectionService from '../services/add-repository-to-collection.service';
+import DeleteRepositoryFromCollectionService from '../services/delete-repository-from-collection.service';
 
 // @desc Get all repositories
 // @route GET /api/v1/repositories
@@ -21,12 +24,13 @@ export const getRepositories = asyncHandler(
 );
 
 // @desc Create a new repository
-// @route POST /api/v1/repositories/:collectionId
+// @route POST /api/v1/repositories
 // @access Private
 export const createRepository = asyncHandler(
   async (req, res, _): Promise<Response | void> => {
     const createRepositoryService = new CreateRepositoryService();
     const {
+      collectionId,
       userId,
       repository: {
         id,
@@ -41,7 +45,6 @@ export const createRepository = asyncHandler(
         is_favorite,
       },
     } = req.body;
-    const { collectionId } = req.params;
 
     const newRepository = await createRepositoryService.execute({
       userId,
@@ -61,6 +64,45 @@ export const createRepository = asyncHandler(
     });
 
     res.status(200).json({ success: true, data: newRepository });
+  },
+);
+
+// @desc Add repository to a certain collection
+// @route POST /api/v1/repositories/:repositoryId/collections/:collectionId
+// @access Private
+export const addRepositoryToCollection = asyncHandler(
+  async (req, res, _): Promise<Response | void> => {
+    const { repositoryId, collectionId } = req.params;
+    const { userId } = req.body;
+
+    const addRepositoryToCollectionService = new AddRepositoryToCollectionService();
+
+    await addRepositoryToCollectionService.execute({
+      repositoryId: Number(repositoryId),
+      collectionId,
+      userId,
+    });
+
+    res.status(200).json({ success: true, data: {} });
+  },
+);
+
+// @desc Add repository to favorites
+// @route POST /api/v1/repositories/:repositoryId/favorites
+// @access Private
+export const addRepositoryToFavorites = asyncHandler(
+  async (req, res, _): Promise<Response | void> => {
+    const { repositoryId } = req.params;
+    const { userId } = req.body;
+
+    const addRepositoryToFavoritesService = new AddRepositoryToFavoritesService();
+
+    await addRepositoryToFavoritesService.execute({
+      repositoryId: Number(repositoryId),
+      userId,
+    });
+
+    res.status(200).json({ success: true, data: {} });
   },
 );
 
@@ -93,6 +135,26 @@ export const removeRepository = asyncHandler(
     const removeRepositoryService = new RemoveRepositoryService();
 
     await removeRepositoryService.execute({ repositoryId });
+
+    res.status(200).json({ success: true, data: {} });
+  },
+);
+
+// @desc Delete a repository from a collection
+// @route DELETE /api/v1/repositories/:repositoryId/collections/:collectionId
+// @access Private
+export const deleteRepositoryFromCollection = asyncHandler(
+  async (req, res, _): Promise<Response | void> => {
+    const { repositoryId, collectionId } = req.params;
+    const { userId } = req.body;
+
+    const deleteRepositoryFromCollectionService = new DeleteRepositoryFromCollectionService();
+
+    await deleteRepositoryFromCollectionService.execute({
+      repositoryId: Number(repositoryId),
+      collectionId,
+      userId,
+    });
 
     res.status(200).json({ success: true, data: {} });
   },

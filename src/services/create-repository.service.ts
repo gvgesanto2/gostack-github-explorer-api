@@ -4,7 +4,7 @@ import ErrorResponse from '../errors/ErrorResponse';
 import Collection from '../models/collection.model';
 import Repository from '../models/repository.model';
 import User from '../models/user.model';
-import AddRepositoryToCollectionService from './add-repository-to-collection.service';
+import { addRepositoryToCollection } from '../utils/repository.utils';
 
 interface ServiceRequest {
   userId: string;
@@ -33,8 +33,6 @@ class CreateRepositoryService {
     const collectionsRepository = getRepository(Collection);
     const reposRepository = getRepository(Repository);
 
-    const addRepositoryToCollectionService = new AddRepositoryToCollectionService();
-
     const [
       existingUser,
       existingCollection,
@@ -61,10 +59,11 @@ class CreateRepositoryService {
     }
 
     if (existingRepository) {
-      await addRepositoryToCollectionService.execute({
+      await addRepositoryToCollection({
         repository: existingRepository,
         collection: existingCollection,
-        checkRepositoryInCollection: true,
+        checkIfRepoExistsInCollection: true,
+        addToAllReposCollection: true,
       });
 
       return existingRepository;
@@ -85,10 +84,11 @@ class CreateRepositoryService {
 
     await reposRepository.save(newRepository);
 
-    await addRepositoryToCollectionService.execute({
+    await addRepositoryToCollection({
       repository: newRepository,
       collection: existingCollection,
-      checkRepositoryInCollection: false,
+      checkIfRepoExistsInCollection: false,
+      addToAllReposCollection: true,
     });
 
     return newRepository;

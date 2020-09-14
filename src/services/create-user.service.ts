@@ -56,7 +56,20 @@ class CreateUserService {
       image_url: '',
     });
 
-    await collectionsRepository.save(collectionAllRepos);
+    const collectionFavoritesTitle = process.env.FAVORITES_COLLECTION_NAME;
+    const collectionFavorites = collectionsRepository.create({
+      title: collectionFavoritesTitle,
+      description: 'My favorites repositories [special collection]',
+      owner_id: user.id,
+      public_title: `${collectionFavoritesTitle}#${user.id}`,
+      is_public: false,
+      image_url: '',
+    });
+
+    await Promise.all([
+      await collectionsRepository.save(collectionAllRepos),
+      await collectionsRepository.save(collectionFavorites),
+    ]);
 
     return user;
   }

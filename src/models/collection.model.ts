@@ -3,10 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import Repository from './repository.model';
 
 import User from './user.model';
 
@@ -36,6 +39,20 @@ class Collection {
 
   @Column()
   public_title: string;
+
+  @ManyToMany(() => Repository, { cascade: true })
+  @JoinTable({
+    name: 'repository_collection_relations',
+    joinColumn: {
+      name: 'collection_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'repository_id',
+      referencedColumnName: 'id',
+    },
+  })
+  repositories: Repository[];
 
   @CreateDateColumn()
   created_at: Date;

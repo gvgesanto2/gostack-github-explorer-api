@@ -3,8 +3,8 @@ import { getRepository } from 'typeorm';
 
 import asyncHandler from '../middleware/asynHandler';
 import Collection from '../models/collection.model';
-import RepositoryCollectionRelation from '../models/repository-collection-relation.model';
 import CreateCollectionService from '../services/create-collection.service';
+import GetCollectionWithReposService from '../services/get-collection-with-repos.service';
 
 // @desc Get all collections
 // @route GET /api/v1/collections
@@ -19,20 +19,35 @@ export const getCollections = asyncHandler(
   },
 );
 
+// @desc Get a single collection
+// @route GET /api/v1/collections/:collectionId
+// @access Private
+export const getCollection = asyncHandler(
+  async (req, res, _): Promise<Response | void> => {
+    const { collectionId } = req.params;
+    const getCollectionWithReposService = new GetCollectionWithReposService();
+
+    const collection = await getCollectionWithReposService.execute({
+      collectionId,
+    });
+
+    res.status(200).json({ success: true, data: collection });
+  },
+);
+
 // @desc Get all repositories from collection
 // @route GET /api/v1/collections/:collectionId/repositories
 // @access Private
 export const getReposFromCollection = asyncHandler(
   async (req, res, _): Promise<Response | void> => {
     const { collectionId } = req.params;
-    const relationsRepository = getRepository(RepositoryCollectionRelation);
+    const getCollectionWithReposService = new GetCollectionWithReposService();
 
-    const repositoriesIds = await relationsRepository.find({
-      select: ['repository_id'],
-      where: { collection_id: collectionId },
+    const { repositories } = await getCollectionWithReposService.execute({
+      collectionId,
     });
 
-    res.status(200).json({ success: true, data: repositoriesIds });
+    res.status(200).json({ success: true, data: repositories });
   },
 );
 

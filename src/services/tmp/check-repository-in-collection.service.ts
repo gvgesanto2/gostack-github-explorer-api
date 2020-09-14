@@ -1,8 +1,8 @@
 import { getRepository } from 'typeorm';
 
-import Collection from '../models/collection.model';
-import RepositoryCollectionRelation from '../models/repository-collection-relation.model';
-import Repository from '../models/repository.model';
+import Collection from '../../models/collection.model';
+import RepositoryCollectionRelation from '../../models/repository-collection-relation.model';
+import Repository from '../../models/repository.model';
 
 interface ServiceRequest {
   repository: Repository;

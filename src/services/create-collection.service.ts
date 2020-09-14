@@ -12,9 +12,10 @@ class CreateCollectionService {
     title,
     description,
     image_url,
-  }: Omit<Collection, 'id' | 'owner' | 'created_at' | 'updated_at'>): Promise<
-    Collection
-  > {
+  }: Omit<
+    Collection,
+    'id' | 'owner' | 'repositories' | 'created_at' | 'updated_at'
+  >): Promise<Collection> {
     const collectionsRepository = getRepository(Collection);
     const usersRepository = getRepository(User);
 

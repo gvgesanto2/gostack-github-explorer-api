@@ -1,10 +1,10 @@
 import { getRepository } from 'typeorm';
-import ErrorResponse from '../errors/ErrorResponse';
 
-import { addRepositoryToCollection } from '../utils/repository.utils';
+import ErrorResponse from '../errors/ErrorResponse';
 import Collection from '../models/collection.model';
 import Repository from '../models/repository.model';
 import User from '../models/user.model';
+import RepositoryCollectionRelation from '../models/repository-collection-relation.model';
 
 interface ServiceRequest {
   userId: string;
@@ -12,7 +12,7 @@ interface ServiceRequest {
   collectionId: string;
 }
 
-class AddRepositoryToCollectionService {
+class DeleteRepositoryFromCollectionService {
   public async execute({
     userId,
     repositoryId,
@@ -21,6 +21,8 @@ class AddRepositoryToCollectionService {
     const usersRepository = getRepository(User);
     const collectionsRepository = getRepository(Collection);
     const reposRepository = getRepository(Repository);
+
+    const relationsRepository = getRepository(RepositoryCollectionRelation);
 
     const [
       existingUser,
@@ -38,7 +40,7 @@ class AddRepositoryToCollectionService {
 
     if (!existingCollection) {
       throw new ErrorResponse('No collection found with this ID', 404);
-    } else if (existingCollection.owner_id !== userId) {
+    } else if (existingCollection.owner_id !== existingUser.id) {
       throw new ErrorResponse(
         'You are not authorized to complete this action.',
         403,
@@ -49,13 +51,24 @@ class AddRepositoryToCollectionService {
       throw new ErrorResponse('No repository found with this ID.', 404);
     }
 
-    await addRepositoryToCollection({
-      collection: existingCollection,
-      repository: existingRepository,
-      checkIfRepoExistsInCollection: true,
-      addToAllReposCollection: false,
+    const relationToDelete = await relationsRepository.findOne({
+      where: {
+        repository_id: existingRepository.id,
+        collection_id: existingCollection.id,
+      },
     });
+
+    console.log(relationToDelete);
+
+    if (!relationToDelete) {
+      throw new ErrorResponse(
+        'This repository does not belong to this collection',
+        400,
+      );
+    }
+
+    await relationsRepository.remove(relationToDelete);
   }
 }
 
-export default AddRepositoryToCollectionService;
+export default DeleteRepositoryFromCollectionService;

@@ -1,7 +1,7 @@
 import { getRepository } from 'typeorm';
-import ErrorResponse from '../errors/ErrorResponse';
 
 import { addRepositoryToCollection } from '../utils/repository.utils';
+import ErrorResponse from '../errors/ErrorResponse';
 import Collection from '../models/collection.model';
 import Repository from '../models/repository.model';
 import User from '../models/user.model';
@@ -9,26 +9,28 @@ import User from '../models/user.model';
 interface ServiceRequest {
   userId: string;
   repositoryId: number;
-  collectionId: string;
 }
 
-class AddRepositoryToCollectionService {
+class AddRepositoryToFavoritesService {
   public async execute({
     userId,
     repositoryId,
-    collectionId,
   }: ServiceRequest): Promise<void> {
     const usersRepository = getRepository(User);
     const collectionsRepository = getRepository(Collection);
     const reposRepository = getRepository(Repository);
 
+    const collectionFavoritesTitle = process.env.FAVORITES_COLLECTION_NAME;
+
     const [
       existingUser,
-      existingCollection,
+      collectionFavorites,
       existingRepository,
     ] = await Promise.all([
       usersRepository.findOne(userId),
-      collectionsRepository.findOne(collectionId),
+      collectionsRepository.findOne({
+        where: { public_title: `${collectionFavoritesTitle}#${userId}` },
+      }),
       reposRepository.findOne(repositoryId),
     ]);
 
@@ -36,26 +38,24 @@ class AddRepositoryToCollectionService {
       throw new ErrorResponse('No user found with this ID.', 404);
     }
 
-    if (!existingCollection) {
-      throw new ErrorResponse('No collection found with this ID', 404);
-    } else if (existingCollection.owner_id !== userId) {
-      throw new ErrorResponse(
-        'You are not authorized to complete this action.',
-        403,
-      );
-    }
-
     if (!existingRepository) {
       throw new ErrorResponse('No repository found with this ID.', 404);
     }
 
+    if (!collectionFavorites) {
+      throw new ErrorResponse(
+        'Server error: The Favorites collection was not found.',
+        500,
+      );
+    }
+
     await addRepositoryToCollection({
-      collection: existingCollection,
       repository: existingRepository,
+      collection: collectionFavorites,
       checkIfRepoExistsInCollection: true,
       addToAllReposCollection: false,
     });
   }
 }
 
-export default AddRepositoryToCollectionService;
+export default AddRepositoryToFavoritesService;
