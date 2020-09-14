@@ -9,7 +9,9 @@ import {
 
 const repositoryRouter = Router();
 
-repositoryRouter.route('/').get(getRepositories).post(createRepository);
+repositoryRouter.route('/').get(getRepositories);
+
+repositoryRouter.route('/:collectionId').post(createRepository);
 
 repositoryRouter
   .route('/:repositoryId')

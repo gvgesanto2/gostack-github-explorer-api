@@ -21,30 +21,62 @@ export const getRepositories = asyncHandler(
 );
 
 // @desc Create a new repository
-// @route POST /api/v1/repositories
+// @route POST /api/v1/repositories/:collectionId
 // @access Private
 export const createRepository = asyncHandler(
   async (req, res, _): Promise<Response | void> => {
     const createRepositoryService = new CreateRepositoryService();
+    const {
+      userId,
+      repository: {
+        id,
+        full_name,
+        description,
+        owner: { login, avatar_url },
+        watchers_count,
+        stargazers_count,
+        forks_count,
+        open_issues_count,
+        issues,
+        is_favorite,
+      },
+    } = req.body;
+    const { collectionId } = req.params;
 
-    const newRepository = await createRepositoryService.execute(req.body);
+    const newRepository = await createRepositoryService.execute({
+      userId,
+      collectionId,
+      repository: {
+        id,
+        full_name,
+        description,
+        owner: { login, avatar_url },
+        watchers_count,
+        stargazers_count,
+        forks_count,
+        open_issues_count,
+        issues,
+        is_favorite,
+      },
+    });
 
     res.status(200).json({ success: true, data: newRepository });
   },
 );
 
-// @desc Update a repository
+// @desc Update certain fields of a repository
 // @route PUT /api/v1/repositories/:repositoryId
 // @access Private
 export const updateRepository = asyncHandler(
   async (req, res, _): Promise<Response | void> => {
     const repositoryId = Number(req.params.repositoryId);
+    const { is_favorite } = req.body;
 
     const updateRepositoryService = new UpdateRepositoryService();
 
     const updatedRepository = await updateRepositoryService.execute({
       repositoryId,
-      fieldsToUpdate: req.body,
+      fieldsToUpdate: { is_favorite },
     });
 
     res.status(200).json({ success: true, data: updatedRepository });

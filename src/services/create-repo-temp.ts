@@ -2,9 +2,9 @@ import { getRepository } from 'typeorm';
 
 import ErrorResponse from '../errors/ErrorResponse';
 import Collection from '../models/collection.model';
+import RepositoryCollectionRelation from '../models/repository-collection-relation.model';
 import Repository from '../models/repository.model';
 import User from '../models/user.model';
-import AddRepositoryToCollectionService from './add-repository-to-collection.service';
 
 interface ServiceRequest {
   userId: string;
@@ -33,7 +33,7 @@ class CreateRepositoryService {
     const collectionsRepository = getRepository(Collection);
     const reposRepository = getRepository(Repository);
 
-    const addRepositoryToCollectionService = new AddRepositoryToCollectionService();
+    const relationsRepository = getRepository(RepositoryCollectionRelation);
 
     const [
       existingUser,
@@ -43,7 +43,7 @@ class CreateRepositoryService {
       usersRepository.findOne(userId),
       collectionsRepository.findOne(collectionId),
       reposRepository.findOne({
-        where: [{ full_name }, { id }],
+        where: { full_name },
       }),
     ]);
 
@@ -61,11 +61,50 @@ class CreateRepositoryService {
     }
 
     if (existingRepository) {
-      await addRepositoryToCollectionService.execute({
-        repository: existingRepository,
-        collection: existingCollection,
-        checkRepositoryInCollection: true,
+      const relationsWithCollectionId = await relationsRepository.find({
+        where: { collection_id: collectionId },
       });
+
+      if (
+        relationsWithCollectionId.some(
+          relation => relation.repository_id === existingRepository.id,
+        )
+      ) {
+        throw new ErrorResponse(
+          'This repository belongs to this collection already',
+          400,
+        );
+      }
+
+      const collectionAllReposTitle = process.env.ALL_REPOS_COLLECTION_NAME;
+      if (existingCollection.title !== collectionAllReposTitle) {
+        // add to all repos
+        const collectionAllRepos = await collectionsRepository.findOne({
+          where: { public_title: `${collectionAllReposTitle}#${userId}` },
+        });
+
+        if (!collectionAllRepos) {
+          throw new ErrorResponse(
+            'Server error: The All Repositories collections was not found.',
+            500,
+          );
+        }
+
+        const newRelation = relationsRepository.create({
+          collection_id: collectionAllRepos.id,
+          repository_id: existingRepository.id,
+        });
+
+        await relationsRepository.save(newRelation);
+      }
+
+      // add to collection id repo
+      const newRelation = relationsRepository.create({
+        collection_id: existingCollection.id,
+        repository_id: existingRepository.id,
+      });
+
+      await relationsRepository.save(newRelation);
 
       return existingRepository;
     }
@@ -85,11 +124,12 @@ class CreateRepositoryService {
 
     await reposRepository.save(newRepository);
 
-    await addRepositoryToCollectionService.execute({
-      repository: newRepository,
-      collection: existingCollection,
-      checkRepositoryInCollection: false,
+    const newRelation = relationsRepository.create({
+      collection_id: existingCollection.id,
+      repository_id: newRepository.id,
     });
+
+    await relationsRepository.save(newRelation);
 
     return newRepository;
   }

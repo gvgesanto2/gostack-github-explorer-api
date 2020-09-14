@@ -6,13 +6,13 @@ export default class AddIsFavoriteFieldToRepositories1599936735564
     await queryRunner.addColumn(
       'repositories',
       new TableColumn({
-        name: 'isFavorite',
+        name: 'is_favorite',
         type: 'boolean',
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropColumn('repositories', 'isFavorite');
+    await queryRunner.dropColumn('repositories', 'is_favorite');
   }
 }

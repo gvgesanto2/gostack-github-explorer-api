@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+
+// import Collection from './collection.model';
 
 @Entity('repositories')
 class Repository {
@@ -40,7 +48,27 @@ class Repository {
   }[];
 
   @Column('boolean')
-  isFavorite: boolean;
+  is_favorite: boolean;
+
+  // @ManyToMany(() => Collection, { cascade: true })
+  // @JoinTable({
+  //   name: 'repository_collection_relations',
+  //   joinColumn: {
+  //     name: 'repository_id',
+  //     referencedColumnName: 'id',
+  //   },
+  //   inverseJoinColumn: {
+  //     name: 'collection_id',
+  //     referencedColumnName: 'id',
+  //   },
+  // })
+  // collections: Collection[];
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }
 
 export default Repository;

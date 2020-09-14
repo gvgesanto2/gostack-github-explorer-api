@@ -1,0 +1,6 @@
+/* eslint-disable no-useless-escape */
+export function checkIsValidEmail(email: string): boolean {
+  const emailRegex = RegExp(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/);
+
+  return emailRegex.test(email);
+}

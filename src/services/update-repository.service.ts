@@ -6,14 +6,14 @@ import Repository from '../models/repository.model';
 interface ServiceRequest {
   repositoryId: number;
   fieldsToUpdate: {
-    isFavorite: boolean;
+    is_favorite: boolean;
   };
 }
 
 class UpdateRepositoryService {
   public async execute({
     repositoryId,
-    fieldsToUpdate: { isFavorite },
+    fieldsToUpdate: { is_favorite },
   }: ServiceRequest): Promise<Repository> {
     const reposRepository = getRepository(Repository);
 
@@ -25,8 +25,10 @@ class UpdateRepositoryService {
 
     const updatedRepository = {
       ...repositoryToUpdate,
-      isFavorite:
-        isFavorite === undefined ? repositoryToUpdate.isFavorite : isFavorite,
+      is_favorite:
+        is_favorite === undefined
+          ? repositoryToUpdate.is_favorite
+          : is_favorite,
     };
 
     await reposRepository.save(updatedRepository);
