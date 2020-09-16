@@ -5,6 +5,7 @@ import asyncHandler from '../middleware/asynHandler';
 import Collection from '../models/collection.model';
 import CreateCollectionService from '../services/create-collection.service';
 import GetCollectionWithReposService from '../services/get-collection-with-repos.service';
+import RemoveCollectionService from '../services/remove-collection.service';
 
 /// //////////////////
 //
@@ -101,8 +102,8 @@ export const getUserCollection = asyncHandler(
 // @access Private
 export const createCollection = asyncHandler(
   async (req, res, _): Promise<Response | void> => {
-    const { id } = req.user;
     const createCollectionService = new CreateCollectionService();
+    const { id } = req.user;
     const { is_public, public_title, title, description, image_url } = req.body;
 
     const newCollection = await createCollectionService.execute({
@@ -115,6 +116,23 @@ export const createCollection = asyncHandler(
     });
 
     res.status(200).json({ success: true, data: newCollection });
+  },
+);
+
+// @desc Remove collection from database
+// @route DELETE /api/v1/collections/:collectionId
+// @access Private
+export const removeCollection = asyncHandler(
+  async (req, res, _): Promise<Response | void> => {
+    const removeCollectionService = new RemoveCollectionService();
+    const { collectionId } = req.params;
+
+    await removeCollectionService.execute({
+      user: req.user,
+      collectionId,
+    });
+
+    res.status(200).json({ success: true });
   },
 );
 

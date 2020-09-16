@@ -7,6 +7,7 @@ import {
   getPublicCollections,
   getUserCollection,
   getUserCollections,
+  removeCollection,
 } from '../controllers/collection.controller';
 import requireAuth from '../middleware/requireAuth';
 import { USER, ADMIN } from '../config/roles';
@@ -47,6 +48,7 @@ collectionRouter
 
 collectionRouter
   .route('/:collectionId')
-  .get(requireAuth, authorize(USER), getUserCollection);
+  .get(requireAuth, authorize(USER), getUserCollection)
+  .delete(requireAuth, authorize(USER), removeCollection);
 
 export default collectionRouter;

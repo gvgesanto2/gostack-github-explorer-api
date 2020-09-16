@@ -2,7 +2,6 @@ import { Response } from 'express';
 import { getRepository } from 'typeorm';
 import asyncHandler from '../middleware/asynHandler';
 import User from '../models/user.model';
-import selectPropsKeysFromModel from '../utils/selectPropsKeysFromModel';
 
 /// //////////////////
 //
@@ -18,13 +17,13 @@ export const getUsers = asyncHandler(
     const usersRepository = getRepository(User);
 
     // Fix later - it's not assignable to select prop in find
-    const propsKeysToExclude = ['password'];
-    const userKeysSelected = selectPropsKeysFromModel(
-      usersRepository,
-      propsKeysToExclude,
-    );
+    // const propsKeysToExclude = ['password'];
+    // const userKeysSelected = selectPropsKeysFromModel(
+    //   usersRepository,
+    //   propsKeysToExclude,
+    // );
 
-    console.log(userKeysSelected);
+    // console.log(userKeysSelected);
 
     const users = await usersRepository.find({
       select: [
