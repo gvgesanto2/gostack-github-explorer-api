@@ -2,17 +2,51 @@ import { Router } from 'express';
 
 import {
   createCollection,
-  getCollection,
-  getCollections,
-  getReposFromCollection,
+  getCollectionsAdmin,
+  getPublicCollection,
+  getPublicCollections,
+  getUserCollection,
+  getUserCollections,
 } from '../controllers/collection.controller';
+import requireAuth from '../middleware/requireAuth';
+import { USER, ADMIN } from '../config/roles';
+import authorize from '../middleware/authorize';
 
 const collectionRouter = Router();
 
-collectionRouter.route('/').get(getCollections).post(createCollection);
-collectionRouter.route('/:collectionId').get(getCollection);
+/// //////////////////
+//
+// Admin routes
+//
+/// //////////////////
+
 collectionRouter
-  .route('/:collectionId/repositories')
-  .get(getReposFromCollection);
+  .route('/admin')
+  .get(requireAuth, authorize(ADMIN), getCollectionsAdmin);
+
+/// //////////////////
+//
+// Public routes
+//
+/// //////////////////
+
+collectionRouter.route('/public').get(getPublicCollections);
+
+collectionRouter.route('/:collectionId/public').get(getPublicCollection);
+
+/// //////////////////
+//
+// User routes
+//
+/// //////////////////
+
+collectionRouter
+  .route('/')
+  .get(requireAuth, getUserCollections)
+  .post(requireAuth, createCollection);
+
+collectionRouter
+  .route('/:collectionId')
+  .get(requireAuth, authorize(USER), getUserCollection);
 
 export default collectionRouter;

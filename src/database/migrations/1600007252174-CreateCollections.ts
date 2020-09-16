@@ -22,7 +22,6 @@ export default class CreateCollections1600007252174
           {
             name: 'title',
             type: 'varchar',
-            isUnique: true,
           },
           {
             name: 'description',
@@ -44,6 +43,7 @@ export default class CreateCollections1600007252174
           {
             name: 'public_title',
             type: 'varchar',
+            isUnique: true,
           },
           {
             name: 'created_at',

@@ -1,4 +1,5 @@
 import { getRepository } from 'typeorm';
+import { roles } from '../config/roles';
 
 import ErrorResponse from '../errors/ErrorResponse';
 import Collection from '../models/collection.model';
@@ -7,14 +8,14 @@ import User from '../models/user.model';
 import { addRepositoryToCollection } from '../utils/repository.utils';
 
 interface ServiceRequest {
-  userId: string;
+  user: User;
   collectionId: string;
   repository: Omit<Repository, 'created_at' | 'updated_at'>;
 }
 
 class CreateRepositoryService {
   public async execute({
-    userId,
+    user,
     collectionId,
     repository: {
       id,
@@ -29,29 +30,22 @@ class CreateRepositoryService {
       is_favorite,
     },
   }: ServiceRequest): Promise<Repository> {
-    const usersRepository = getRepository(User);
     const collectionsRepository = getRepository(Collection);
     const reposRepository = getRepository(Repository);
 
-    const [
-      existingUser,
-      existingCollection,
-      existingRepository,
-    ] = await Promise.all([
-      usersRepository.findOne(userId),
+    const [existingCollection, existingRepository] = await Promise.all([
       collectionsRepository.findOne(collectionId),
       reposRepository.findOne({
         where: [{ full_name }, { id }],
       }),
     ]);
 
-    if (!existingUser) {
-      throw new ErrorResponse('No user found with this ID.', 404);
-    }
-
     if (!existingCollection) {
       throw new ErrorResponse('No collection found with this ID', 404);
-    } else if (existingCollection.owner_id !== userId) {
+    } else if (
+      existingCollection.owner_id !== user.id &&
+      user.role !== roles.ADMIN
+    ) {
       throw new ErrorResponse(
         'You are not authorized to complete this action.',
         403,

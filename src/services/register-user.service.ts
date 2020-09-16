@@ -4,23 +4,37 @@ import { getRepository } from 'typeorm';
 import ErrorResponse from '../errors/ErrorResponse';
 import Collection from '../models/collection.model';
 import User from '../models/user.model';
-import { checkIsValidEmail } from '../utils/auth.utils';
+import {
+  checkIsValidEmail,
+  checkIsValidPassword,
+  createToken,
+} from '../utils/auth.utils';
 
-class CreateUserService {
+interface ServiceResponse {
+  user: User;
+  token: string;
+}
+
+const userRoles = ['user'];
+
+class RegisterUserService {
   public async execute({
     name,
     avatar,
+    role,
     email,
     password,
-  }: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> {
+  }: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<ServiceResponse> {
     const usersRepository = getRepository(User);
     const collectionsRepository = getRepository(Collection);
+
+    const userRole = userRoles.includes(role) ? role : 'user';
 
     if (!checkIsValidEmail(email)) {
       throw new ErrorResponse('Email invalid. Please add a valid email.', 400);
     }
 
-    if (password.length < 6) {
+    if (!checkIsValidPassword(password)) {
       throw new ErrorResponse(
         'Password invalid. Please add a password with at least 6 characters.',
         400,
@@ -40,6 +54,7 @@ class CreateUserService {
     const user = usersRepository.create({
       name,
       avatar,
+      role: userRole,
       email,
       password: hashedPassword,
     });
@@ -71,8 +86,13 @@ class CreateUserService {
       await collectionsRepository.save(collectionFavorites),
     ]);
 
-    return user;
+    const token = createToken(user.id);
+
+    return {
+      user,
+      token,
+    };
   }
 }
 
-export default CreateUserService;
+export default RegisterUserService;

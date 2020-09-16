@@ -1,10 +1,10 @@
 import { getRepository } from 'typeorm';
 
-import { addRepositoryToCollection } from '../utils/repository.utils';
-import ErrorResponse from '../errors/ErrorResponse';
-import Collection from '../models/collection.model';
-import Repository from '../models/repository.model';
-import User from '../models/user.model';
+import { addRepositoryToCollection } from '../../utils/repository.utils';
+import ErrorResponse from '../../errors/ErrorResponse';
+import Collection from '../../models/collection.model';
+import Repository from '../../models/repository.model';
+import User from '../../models/user.model';
 
 interface ServiceRequest {
   userId: string;

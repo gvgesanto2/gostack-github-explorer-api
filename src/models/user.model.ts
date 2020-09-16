@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+import { roles, Roles } from '../config/roles';
+
 @Entity('users')
 class User {
   @PrimaryGeneratedColumn('uuid')
@@ -13,6 +15,13 @@ class User {
 
   @Column()
   name: string;
+
+  @Column({
+    type: 'enum',
+    enum: roles,
+    default: 'user',
+  })
+  role: Roles;
 
   @Column()
   avatar: string;
